@@ -213,6 +213,7 @@ impl Ignore {
             igtmp.has_git =
                 if self.0.opts.require_git && self.0.opts.git_ignore {
                     parent.join(".git").exists()
+                        || parent.join(".jj").exists()
                 } else {
                     false
                 };
@@ -247,7 +248,9 @@ impl Ignore {
         let git_type = if self.0.opts.require_git
             && (self.0.opts.git_ignore || self.0.opts.git_exclude)
         {
-            dir.join(".git").metadata().ok().map(|md| md.file_type())
+            dir.join(".git").metadata().ok()
+                .or_else(|| dir.join(".jj").metadata().ok())
+                .map(|md| md.file_type())
         } else {
             None
         };
